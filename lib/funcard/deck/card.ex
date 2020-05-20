@@ -49,7 +49,7 @@ defmodule Funcard.Deck.Card do
   @doc """
   Intended mostly for internal use, this function recursively fills a template
   string with each string in the provided list of tuples.
-  
+
   It does so based on the number each string is paired with. Unlike `fill/2`,
   the template mark must have a positive number.
 

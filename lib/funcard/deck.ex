@@ -2,6 +2,8 @@ defmodule Funcard.Deck do
   use TypedStruct
   alias Funcard.Deck.Card
 
+  @derive Jason.Encoder
+
   @moduledoc """
   Manages decks and shuffles them.
   """
