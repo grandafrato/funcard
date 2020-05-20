@@ -13,7 +13,7 @@ defmodule Funcard.Deck.Card do
   end
 
   def fill(table_card, player_card),
-    do: String.replace(table_card_data, "{|#{position}|}", player_card)
+    do: String.replace(table_card.data, ~r/\{\|.*\|\}/, player_card.data)
 
   def fill_data(table_card_data, []), do: table_card_data
 

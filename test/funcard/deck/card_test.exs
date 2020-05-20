@@ -9,8 +9,8 @@ defmodule Funcard.Deck.CardTest do
 
   describe "fill/2" do
     test "it fills in a basic template" do
-      assert Card.fill(@basic_card, @player_card_taxes) == "I am addicted to eating taxes"
-      assert Card.fill(@basic_card, @player_card_beer) == "I am addicted to eating beer"
+      assert Card.fill(@basic_card, @player_card_taxes) == "I am addicted to eating taxes."
+      assert Card.fill(@basic_card, @player_card_beer) == "I am addicted to eating beer."
     end
 
     test "it fills a multi-answer card template" do
