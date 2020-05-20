@@ -13,6 +13,14 @@ defmodule Funcard.MixProject do
       deps: deps(),
       dialyzer: [
         plt_file: {:no_warn, "priv/plts/dialyzer.plt"}
+      ],
+
+      # Docs
+      name: "Funcard",
+      source_url: "https://github.com/grandafrato/funcard",
+      docs: [
+        main: "Funcard",
+        extras: ["README.md"]
       ]
     ]
   end
@@ -48,6 +56,7 @@ defmodule Funcard.MixProject do
       {:jason, "~> 1.0"},
       {:plug_cowboy, "~> 2.0"},
       {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
+      {:ex_doc, "~> 0.22", only: :dev, runtime: false},
       {:typed_struct, "~> 0.1.4"}
     ]
   end

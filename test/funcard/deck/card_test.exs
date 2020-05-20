@@ -2,6 +2,8 @@ defmodule Funcard.Deck.CardTest do
   use ExUnit.Case, async: true
   alias Funcard.Deck.Card
 
+  doctest Card
+
   @basic_card %Card{data: "I am addicted to eating {||}."}
   @multi_answer_card %Card{data: "I like to drink {|1|}, but not without my {|2|}. Yes, {|2|}."}
   @player_card_beer %Card{data: "beer"}
@@ -19,6 +21,14 @@ defmodule Funcard.Deck.CardTest do
 
       assert Card.fill(@multi_answer_card, [@player_card_beer, @player_card_taxes]) ==
                "I like to drink beer, but not without my taxes. Yes, taxes."
+    end
+
+    test "if a multi answer table card is only given one answer, it uses it everywhere" do
+      assert Card.fill(@multi_answer_card, @player_card_taxes) ==
+               "I like to drink taxes, but not without my taxes. Yes, taxes."
+
+      assert Card.fill(@multi_answer_card, @player_card_beer) ==
+               "I like to drink beer, but not without my beer. Yes, beer."
     end
   end
 
