@@ -36,7 +36,7 @@ defmodule Funcard.Deck.Card do
       "I love to eat foo, but when foo or foo is involved I hate foo."
 
   """
-  @spec fill(t(), [t(), ...]) :: String.t()
+  @spec fill(t(), list(t())) :: String.t()
   def fill(table_card, player_cards) when is_list(player_cards) do
     indexed_cards_data = Enum.map(player_cards, & &1.data) |> Enum.with_index(1)
     fill_data(table_card.data, indexed_cards_data)
