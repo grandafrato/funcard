@@ -108,7 +108,9 @@ defmodule Funcard.Deck do
       }
 
   """
-  @spec merge(t(), t()) :: t()
+  @spec merge(t() | nil, t()) :: t()
+  def merge(nil, deck2), do: deck2
+
   def merge(deck1, deck2) do
     %__MODULE__{
       name: "#{deck1.name} + #{deck2.name}",

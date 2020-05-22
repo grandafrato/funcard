@@ -60,5 +60,11 @@ defmodule Funcard.DeckTest do
 
       assert merged_deck.table_cards == [%Card{data: "{||} oof"} | @table_cards]
     end
+
+    test "returns the second argument when the first is nil" do
+      merged_deck = Deck.merge(nil, @deck2)
+
+      assert merged_deck == @deck2
+    end
   end
 end
