@@ -19,7 +19,7 @@ defmodule Funcard.Game do
     GenServer.call(pid, :get_deck)
   end
 
-  @spec add_player(pid(), Player.t()) :: none()
+  @spec add_player(pid(), Player.t()) :: :ok
   def add_player(pid, player) do
     GenServer.cast(pid, {:add_player, player})
   end

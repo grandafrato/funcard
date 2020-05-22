@@ -1,5 +1,5 @@
 defmodule Funcard.GameTest do
-  use ExUnit.Case, async: true
+  use ExUnit.Case
 
   alias Funcard.Deck
   alias Funcard.Deck.Card
@@ -18,11 +18,6 @@ defmodule Funcard.GameTest do
     player_cards: [%Card{data: "slom"}, %Card{data: "*cries*"}, %Card{data: "toes"} | @hand],
     table_cards: [%Card{data: "one {||}"}, %Card{data: "two {||}"}, %Card{data: "three {||}"}]
   }
-
-  setup_all do
-    {:ok, pid} = Game.start_link(decks: [@deck1, @deck2])
-    {:ok, [game: pid]}
-  end
 
   setup do
     {:ok, pid} = Game.start_link(decks: [@deck1, @deck2])
@@ -50,7 +45,7 @@ defmodule Funcard.GameTest do
   end
 
   describe "addition of players" do
-    test "add first player", %{game: pid} do
+    test "add first player", %{pid: pid} do
       Game.add_player(pid, %Player{
         name: "foo",
         pid:
@@ -64,7 +59,17 @@ defmodule Funcard.GameTest do
       assert %Player{name: "foo"} |> match?(Game.get_player_by_name(pid, "foo"))
     end
 
-    test "adding the same player twice will not duplicate it", %{game: pid} do
+    test "adding the same player twice will not duplicate it", %{pid: pid} do
+      Game.add_player(pid, %Player{
+        name: "foo",
+        pid:
+          spawn(fn ->
+            receive do
+              {:player_added, player} -> player
+            end
+          end)
+      })
+
       Game.add_player(pid, %Player{
         name: "foo",
         pid:
@@ -80,7 +85,17 @@ defmodule Funcard.GameTest do
       assert players == Enum.dedup(players)
     end
 
-    test "adding a player with the same name will replace it", %{game: pid} do
+    test "adding a player with the same name will replace it", %{pid: pid} do
+      Game.add_player(pid, %Player{
+        name: "foo",
+        pid:
+          spawn(fn ->
+            receive do
+              {:player_added, player} -> player
+            end
+          end)
+      })
+
       player1 = Game.get_player_by_name(pid, "foo")
 
       Game.add_player(pid, %Player{
