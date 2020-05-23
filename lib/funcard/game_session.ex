@@ -1,15 +1,15 @@
-defmodule Funcard.Game do
+defmodule Funcard.GameSession do
   use TypedStruct
 
   alias Funcard.Deck
   alias Funcard.Event
+  alias Funcard.GameState
   alias Funcard.Player
 
-  typedstruct do
-    field :deck, Deck.t(), enforce: true
+  typedstruct enforce: true do
+    field :admin, Player.t()
     field :events, list(Event.t()), default: []
-    field :players, list(Player.t()), enforce: true
-    field :round, non_neg_integer(), default: 0
+    field :initial_state, GameState.t()
   end
 
   @spec new(list(Deck.t()), Player.t()) :: t()
@@ -17,8 +17,8 @@ defmodule Funcard.Game do
     deck = List.foldr(decks, nil, fn x, acc -> Deck.merge(acc, x) end)
 
     %__MODULE__{
-      deck: deck,
-      players: [Player.set_admin(player)]
+      admin: player,
+      initial_state: GameState.new(deck, [player])
     }
   end
 
@@ -26,10 +26,10 @@ defmodule Funcard.Game do
   def add_event(game, %Event{} = event) do
     events =
       if [_event2 | [_event1 | _]] |> match?([event | game.events]) do
-        [event2 | [event1 | _]] = [event | game.events]
+        [event2 | [event1 | other_events]] = [event | game.events]
 
         if event2.timestamp < event1.timestamp do
-          Enum.sort_by([event | game.events], fn x -> x.timestamp end, :desc)
+          [event1 | [event2 | other_events]]
         else
           [event | game.events]
         end
