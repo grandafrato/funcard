@@ -13,7 +13,6 @@ defmodule Funcard.PlayerTest do
   ]
   @player %Player{
     name: "Johnny",
-    pid: spawn(fn -> nil end),
     hand: @hand,
     cards_won: @cards_won
   }
