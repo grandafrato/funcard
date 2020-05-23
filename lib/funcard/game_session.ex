@@ -24,19 +24,21 @@ defmodule Funcard.GameSession do
 
   @spec add_event(t(), struct()) :: t()
   def add_event(game, %Event{} = event) do
-    events =
-      if [_event2 | [_event1 | _]] |> match?([event | game.events]) do
-        [event2 | [event1 | other_events]] = [event | game.events]
-
-        if event2.timestamp < event1.timestamp do
-          [event1 | [event2 | other_events]]
-        else
-          [event | game.events]
-        end
-      else
-        [event | game.events]
-      end
+    events = sort_into_events(event, game.events)
 
     Map.put(game, :events, events)
+  end
+
+  @spec sort_into_events(Event.t(), list(Event.t())) :: list(Event.t())
+  defp sort_into_events(event, []), do: [event]
+
+  defp sort_into_events(event, events) do
+    [event1 | [event2 | other_events]] = [event | events]
+
+    if event2.timestamp <= event1.timestamp do
+      [event2 | sort_into_events(event1, other_events)]
+    else
+      [event | events]
+    end
   end
 end

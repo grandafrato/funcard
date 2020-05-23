@@ -58,15 +58,19 @@ defmodule Funcard.GameTest do
     test "events are sorted by timestamp, not the order added" do
       event1 = Event.new(:foo, ["bar", "baz"])
       event2 = Event.new(:eat, ["not soap,", "but bars"])
+      event3 = Event.new(:sing, ["a song", "with ears"])
+      event4 = Event.new(:really, ["it's true", "I promise"])
 
       game =
         GameSession.new([@deck1, @deck2], @player)
+        |> GameSession.add_event(event4)
         |> GameSession.add_event(event2)
         |> GameSession.add_event(event1)
+        |> GameSession.add_event(event3)
 
       assert game == %GameSession{
                admin: @player,
-               events: [event2, event1],
+               events: [event1, event2, event3, event4],
                initial_state: %GameState{
                  deck: Deck.merge(@deck2, @deck1),
                  players: [@player],
