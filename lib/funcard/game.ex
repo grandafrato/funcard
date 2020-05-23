@@ -29,7 +29,7 @@ defmodule Funcard.Game do
         [event2 | [event1 | _]] = [event | game.events]
 
         if event2.timestamp < event1.timestamp do
-          Enum.sort_by([event | game.events], fn x -> x.timestamp end)
+          Enum.sort_by([event | game.events], fn x -> x.timestamp end, :desc)
         else
           [event | game.events]
         end

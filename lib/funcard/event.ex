@@ -4,7 +4,7 @@ defmodule Funcard.Event do
   typedstruct enforce: true do
     field :event, atom()
     field :args, list(any())
-    field :timestamp, integer()
+    field :timestamp, DateTime.t()
   end
 
   @spec new(atom(), list(any())) :: t()
@@ -12,7 +12,7 @@ defmodule Funcard.Event do
     %__MODULE__{
       event: event,
       args: args,
-      timestamp: DateTime.utc_now() |> DateTime.to_unix()
+      timestamp: DateTime.utc_now()
     }
   end
 end
