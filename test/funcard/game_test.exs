@@ -112,6 +112,9 @@ defmodule Funcard.GameTest do
       player2 = Game.get_player_by_name(pid, "foo")
 
       assert player1 != player2
+
+      players = Game.get_players(pid)
+      assert players == Enum.dedup_by(players, fn x -> x.name end)
     end
   end
 end

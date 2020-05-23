@@ -65,6 +65,7 @@ defmodule Funcard.Game do
 
   @impl true
   def handle_cast({:add_player, player}, state) do
-    {:noreply, Map.put(state, :players, [player | state.players])}
+    players = Enum.dedup_by([player | state.players], fn x -> x.name end)
+    {:noreply, Map.put(state, :players, players)}
   end
 end
