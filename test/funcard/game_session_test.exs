@@ -1,5 +1,5 @@
 defmodule Funcard.GameTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
 
   alias Funcard.Deck
   alias Funcard.Deck.Card
@@ -7,6 +7,8 @@ defmodule Funcard.GameTest do
   alias Funcard.GameSession
   alias Funcard.GameState
   alias Funcard.Player
+
+  doctest GameSession
 
   @hand [%Card{data: "bar"}, %Card{data: "baz"}]
   @deck1 %Deck{
@@ -23,7 +25,7 @@ defmodule Funcard.GameTest do
 
   describe "new/2" do
     test "it makes a new game, with the passed in player as admin" do
-      game = GameSession.new([@deck1, @deck2], @player)
+      game = GameSession.new([@deck1, @deck2], @player, shuffle?: false)
 
       assert game == %GameSession{
                admin: @player,
@@ -36,12 +38,27 @@ defmodule Funcard.GameTest do
                }
              }
     end
+
+    test "the deck is shuffled by default when creating a new GameSession" do
+      %{initial_state: %{deck: deck}} =
+        GameSession.new([@deck1, @deck2], @player, shuffle?: false)
+
+      %{initial_state: %{deck: shuffled_deck}} = GameSession.new([@deck1, @deck2], @player)
+
+      assert deck != shuffled_deck
+
+      assert Enum.all?(shuffled_deck.player_cards, &Enum.member?(deck.player_cards, &1))
+      assert Enum.all?(shuffled_deck.player_cards, &Enum.member?(deck.player_cards, &1))
+    end
   end
 
   describe "events" do
     test "add_event/2 appends an event to the list of events" do
       event = Event.new(:foo, ["bar", "baz"])
-      game = GameSession.new([@deck1, @deck2], @player) |> GameSession.add_event(event)
+
+      game =
+        GameSession.new([@deck1, @deck2], @player, shuffle?: false)
+        |> GameSession.add_event(event)
 
       assert game == %GameSession{
                admin: @player,
@@ -62,7 +79,7 @@ defmodule Funcard.GameTest do
       event4 = Event.new(:really, ["it's true", "I promise"])
 
       game =
-        GameSession.new([@deck1, @deck2], @player)
+        GameSession.new([@deck1, @deck2], @player, shuffle?: false)
         |> GameSession.add_event(event4)
         |> GameSession.add_event(event2)
         |> GameSession.add_event(event1)
