@@ -7,7 +7,7 @@ defmodule Funcard.GameSession do
   alias Funcard.Player
 
   typedstruct enforce: true do
-    field :admin, Player.t()
+    field :admin, Player.id()
     field :events, list(Event.t()), default: []
     field :initial_state, GameState.t()
   end
@@ -32,14 +32,10 @@ defmodule Funcard.GameSession do
       ...>     %Funcard.Deck.Card{data: "3 {||}"}
       ...>   ]
       ...> }
-      iex> player = %Funcard.Player{name: "tod"}
+      iex> player = %Funcard.Player{name: "tod", id: ""}
       iex> Funcard.GameSession.new([deck], player, shuffle?: false)
       %GameSession{
-        admin: %Funcard.Player{
-          cards_won: [],
-          hand: [],
-          name: "tod"
-        },
+        admin: "",
         events: [],
         initial_state: %Funcard.GameState{
           deck: %Funcard.Deck{
@@ -59,6 +55,7 @@ defmodule Funcard.GameSession do
             %Funcard.Player{
               cards_won: [],
               hand: [],
+              id: "",
               name: "tod"
             }
           ],
@@ -78,7 +75,7 @@ defmodule Funcard.GameSession do
       end
 
     %__MODULE__{
-      admin: player,
+      admin: player.id,
       initial_state: GameState.new(deck, [player])
     }
   end
@@ -91,6 +88,11 @@ defmodule Funcard.GameSession do
     events = sort_into_events(event, game.events)
 
     Map.put(game, :events, events)
+  end
+
+  @spec apply_events(t()) :: GameState.t()
+  def apply_events(game) do
+    List.foldl(game.events, game.initial_state, &GameState.apply_event(&2, &1))
   end
 
   @spec sort_into_events(Event.t(), list(Event.t())) :: list(Event.t())

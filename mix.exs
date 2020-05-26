@@ -58,7 +58,8 @@ defmodule Funcard.MixProject do
       {:dialyxir, "~> 1.0", only: [:dev, :test], runtime: false},
       {:ex_doc, "~> 0.22", only: :dev, runtime: false},
       {:typed_struct, "~> 0.1.4"},
-      {:mix_test_watch, "~> 1.0", only: :dev, runtime: false}
+      {:mix_test_watch, "~> 1.0", only: :dev, runtime: false},
+      {:elixir_uuid, "~> 1.2"}
     ]
   end
 

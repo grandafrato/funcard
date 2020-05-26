@@ -6,10 +6,34 @@ defmodule Funcard.Player do
   Represents a player in the game.
   """
 
+  @type id() :: String.t()
+
   typedstruct do
-    field :name, String.t(), enforce: true
-    field :hand, [Card.t()], default: []
     field :cards_won, [Card.t()], default: []
+    field :hand, [Card.t()], default: []
+    field :id, id(), enforce: true
+    field :name, String.t(), enforce: true
+  end
+
+  @spec draw_card(t(), [Card.t()]) :: t()
+  def draw_card(player, player_cards) do
+    {card, leftover_cards} = List.pop_at(player_cards, 0)
+    {Map.put(player, :hand, [card | player.hand]), leftover_cards}
+  end
+
+  def draw_card({player, player_cards}), do: draw_card(player, player_cards)
+
+  @doc """
+  Generates a new player with the given name, a random id and an optionally
+  given hand.
+  """
+  @spec new(String.t(), [Card.t()]) :: t()
+  def new(name, hand \\ []) do
+    %__MODULE__{
+      hand: hand,
+      id: UUID.uuid1(),
+      name: name
+    }
   end
 
   @doc """
@@ -21,12 +45,13 @@ defmodule Funcard.Player do
   ## Example
 
       iex> hand = [%Funcard.Deck.Card{data: "foo"}, %Funcard.Deck.Card{data: "bar"}, %Funcard.Deck.Card{data: "baz"}]
-      iex> player = %Funcard.Player{name: "Dave", hand: hand}
+      iex> player = %Funcard.Player{name: "Dave", hand: hand, id: ""}
       iex> Funcard.Player.play_card(player, 2)
       {%Funcard.Deck.Card{data: "bar"},
        %Funcard.Player{
          cards_won: [],
          hand: [%Funcard.Deck.Card{data: "foo"}, %Funcard.Deck.Card{data: "baz"}],
+         id: "",
          name: "Dave"
        }}
 
@@ -42,11 +67,12 @@ defmodule Funcard.Player do
 
   ## Example
 
-      iex> %Funcard.Player{name: "Dave"}
+      iex> %Funcard.Player{name: "Dave", id: ""}
       ...> |> Funcard.Player.win_card(%Funcard.Deck.Card{data: "I'm currently eating {||}"})
       %Funcard.Player{
         cards_won: [%Funcard.Deck.Card{data: "I'm currently eating {||}"}],
         hand: [],
+        id: "",
         name: "Dave"
       }
 

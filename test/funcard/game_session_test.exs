@@ -1,12 +1,7 @@
-defmodule Funcard.GameTest do
+defmodule Funcard.GameSessionTest do
   use ExUnit.Case, async: true
 
-  alias Funcard.Deck
-  alias Funcard.Deck.Card
-  alias Funcard.Event
-  alias Funcard.GameSession
-  alias Funcard.GameState
-  alias Funcard.Player
+  alias Funcard.{Deck, Deck.Card, Event, GameSession, GameState, Player}
 
   doctest GameSession
 
@@ -18,17 +13,25 @@ defmodule Funcard.GameTest do
   }
   @deck2 %Deck{
     name: "Bar Deck",
-    player_cards: [%Card{data: "slom"}, %Card{data: "*cries*"}, %Card{data: "toes"} | @hand],
+    player_cards: [
+      %Card{data: "slom"},
+      %Card{data: "*cries*"},
+      %Card{data: "toes"},
+      %Card{data: "bananana"},
+      %Card{data: "Craig"},
+      %Card{data: "pizza"},
+      %Card{data: "lizard"}
+    ],
     table_cards: [%Card{data: "one {||}"}, %Card{data: "two {||}"}, %Card{data: "three {||}"}]
   }
-  @player %Player{name: "Foo"}
+  @player Player.new("Foo")
 
   describe "new/2" do
     test "it makes a new game, with the passed in player as admin" do
       game = GameSession.new([@deck1, @deck2], @player, shuffle?: false)
 
       assert game == %GameSession{
-               admin: @player,
+               admin: @player.id,
                events: [],
                initial_state: %GameState{
                  deck: Deck.merge(@deck2, @deck1),
@@ -61,7 +64,7 @@ defmodule Funcard.GameTest do
         |> GameSession.add_event(event)
 
       assert game == %GameSession{
-               admin: @player,
+               admin: @player.id,
                events: [event],
                initial_state: %GameState{
                  deck: Deck.merge(@deck2, @deck1),
@@ -86,7 +89,7 @@ defmodule Funcard.GameTest do
         |> GameSession.add_event(event3)
 
       assert game == %GameSession{
-               admin: @player,
+               admin: @player.id,
                events: [event1, event2, event3, event4],
                initial_state: %GameState{
                  deck: Deck.merge(@deck2, @deck1),
@@ -94,6 +97,54 @@ defmodule Funcard.GameTest do
                  round: 0,
                  turn: :nobody
                }
+             }
+    end
+
+    test "apply_events/1" do
+      baz = Player.new("Baz")
+
+      game =
+        GameSession.new([@deck1, @deck2], @player, shuffle?: false)
+        |> GameSession.add_event(Event.add_player(baz))
+        |> GameSession.add_event(Event.start_game())
+        |> GameSession.add_event(Event.play_card(baz, %Card{data: "fasd"}))
+        |> GameSession.add_event(Event.end_round(%Card{data: "bar"}))
+
+      deck = Deck.merge(@deck2, @deck1)
+
+      [
+        _card1
+        | [
+            card2
+            | [
+                card3
+                | [
+                    card4
+                    | [
+                        card5
+                        | [
+                            card6
+                            | [card7 | [card8 | [card9 | [card10 | [card11 | cards]]]]]
+                          ]
+                      ]
+                  ]
+              ]
+          ]
+      ] = deck.player_cards
+
+      [card_won | [card_in_play | table_cards]] = deck.table_cards
+
+      assert GameSession.apply_events(game) == %GameState{
+               deck: Map.put(deck, :player_cards, cards) |> Map.put(:table_cards, table_cards),
+               players: [
+                 Map.put(baz, :cards_won, card_won)
+                 |> Map.put(:hand, [card3, card5, card7, card9, card11]),
+                 Map.put(@player, :hand, [card2, card4, card6, card8, card10])
+               ],
+               round: 2,
+               turn:
+                 Map.put(baz, :cards_won, card_won)
+                 |> Map.put(:hand, [card3, card5, card7, card9, card11])
              }
     end
   end
