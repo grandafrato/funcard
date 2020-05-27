@@ -32,8 +32,8 @@ defmodule Funcard.GameState do
 
   @spec start_game(t()) :: t()
   def start_game(game_state) do
-    {players, player_cards} = distribute_cards(game_state.players, game_state.deck.player_cards)
-    [_, table_cards] = game_state.deck.table_cards
+    {players, player_cards} = d_cards(game_state.players, game_state.deck.player_cards)
+    table_cards = tl(game_state.deck.table_cards)
 
     Map.put(game_state, :turn, List.last(game_state.players).id)
     |> Map.put(:round, game_state.round + 1)
@@ -44,26 +44,30 @@ defmodule Funcard.GameState do
     )
   end
 
-  defp distribute_cards(players, player_cards) do
-    distribute_cards(d_cards(players, player_cards), 0)
-  end
-
-  defp distribute_cards(response, 4), do: response
-
-  defp distribute_cards({players, player_cards}, num) do
-    distribute_cards(d_cards(players, player_cards), num + 1)
-  end
-
   defp d_cards(players, player_cards) do
-    scan =
-      Enum.scan(players, {nil, player_cards}, fn x, {_, acc} ->
-        Player.draw_card(x, acc)
+    chunked = Enum.chunk_every(player_cards, Enum.count(players))
+
+    new_cards_for_player =
+      Enum.map(1..Enum.count(players), fn x ->
+        Enum.map(chunked, fn y -> Enum.fetch!(y, x - 1) end)
+      end)
+      |> Enum.map(fn x -> Enum.take(x, 5) end)
+
+    mapped_players =
+      players
+      |> Enum.map(fn x ->
+        Enum.map(new_cards_for_player, fn y -> Map.put(x, :hand, y) end)
       end)
 
-    IO.inspect(scan)
+    updated_players =
+      mapped_players
+      |> Enum.with_index()
+      |> Enum.map(fn {players, index} ->
+        Enum.fetch!(players, index)
+      end)
 
-    updated_players = Enum.map(scan, fn {x, _} -> x end)
-    {_, updated_cards} = List.last(scan)
-    {updated_players, updated_cards}
+    updated_player_cards = Enum.take(player_cards, -Enum.count(players))
+
+    {updated_players, updated_player_cards}
   end
 end

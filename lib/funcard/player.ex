@@ -15,7 +15,6 @@ defmodule Funcard.Player do
     field :name, String.t(), enforce: true
   end
 
-  @spec draw_card(t(), [Card.t()]) :: t()
   def draw_card(player, player_cards) do
     {card, leftover_cards} = List.pop_at(player_cards, 0)
     {Map.put(player, :hand, [card | player.hand]), leftover_cards}

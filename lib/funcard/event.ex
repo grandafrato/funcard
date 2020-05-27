@@ -47,7 +47,7 @@ defmodule Funcard.Event do
   @doc """
   Gnerates the event that makes a player play the selected card.
   """
-  @spec play_card(Player.t(), pos_integer()) :: t()
+  @spec play_card(Player.t(), Card.t()) :: t()
   def play_card(player, card), do: new(:play_card, [player, card])
 
   @doc """
