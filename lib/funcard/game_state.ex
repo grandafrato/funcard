@@ -30,12 +30,27 @@ defmodule Funcard.GameState do
     Map.put(game_state, :players, [player | game_state.players])
   end
 
+  @spec play_card(t(), Player.id(), integer()) :: t()
+  def play_card(game_state, player_id, card_id) do
+    {_card, player} =
+      game_state.players
+      |> Enum.find(&(&1.id == player_id))
+      |> Player.play_card(card_id)
+
+    {first_half, [_ | second_half]} =
+      Enum.split(game_state.players, Enum.find_index(game_state.players, &(&1.id == player_id)))
+
+    game_state
+    |> Map.put(:players, first_half ++ [player | second_half])
+  end
+
   @spec start_game(t()) :: t()
   def start_game(game_state) do
-    {players, player_cards} = d_cards(game_state.players, game_state.deck.player_cards)
+    {players, player_cards} = distribute_cards(game_state.players, game_state.deck.player_cards)
     table_cards = tl(game_state.deck.table_cards)
 
-    Map.put(game_state, :turn, List.last(game_state.players).id)
+    game_state
+    |> Map.put(:turn, List.last(game_state.players).id)
     |> Map.put(:round, game_state.round + 1)
     |> Map.put(:players, players)
     |> Map.put(
@@ -44,7 +59,7 @@ defmodule Funcard.GameState do
     )
   end
 
-  defp d_cards(players, player_cards) do
+  defp distribute_cards(players, player_cards) do
     chunked = Enum.chunk_every(player_cards, Enum.count(players))
 
     new_cards_for_player =

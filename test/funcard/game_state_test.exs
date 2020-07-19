@@ -21,8 +21,9 @@ defmodule Funcard.GameStateTest do
     ],
     table_cards: [%Card{data: "one {||}"}, %Card{data: "two {||}"}, %Card{data: "three {||}"}]
   }
-  @player Player.new("Foo")
-  @game_state GameState.new(@deck, [@player])
+  @player1 Player.new("Player 1")
+  @player2 Player.new("Player 2")
+  @game_state GameState.new(@deck, [@player1])
 
   describe "apply_event/1" do
     test "will rasie if there is no associated function for the event" do
@@ -32,18 +33,18 @@ defmodule Funcard.GameStateTest do
     end
 
     test "will apply event if associated function exists" do
-      assert GameState.apply_event(@game_state, Event.add_player(@player)) ==
-               GameState.add_player(@game_state, @player)
+      assert GameState.apply_event(@game_state, Event.add_player(@player1)) ==
+               GameState.add_player(@game_state, @player1)
     end
   end
 
   test "add_player/2 adds a player to the GameState" do
-    assert GameState.add_player(@game_state, @player) == GameState.new(@deck, [@player, @player])
+    assert GameState.add_player(@game_state, @player1) ==
+             GameState.new(@deck, [@player1, @player1])
   end
 
   test "start_game/1 starts a game by giving each player 5 new cards and setting the round to 1" do
-    player2 = Player.new("Player 2")
-    game_state = @game_state |> GameState.add_player(player2) |> GameState.start_game()
+    game_state = @game_state |> GameState.add_player(@player2) |> GameState.start_game()
 
     deck =
       Map.put(@deck, :player_cards, Enum.take(@deck.player_cards, -2))
@@ -52,14 +53,27 @@ defmodule Funcard.GameStateTest do
     updated_player_cards = Enum.drop_every(Enum.take(@deck.player_cards, 10), 2)
     updated_player2_cards = Enum.take_every(Enum.take(@deck.player_cards, 10), 2)
 
-    updated_player = Map.put(@player, :hand, updated_player_cards)
-    updated_player2 = Map.put(player2, :hand, updated_player2_cards)
+    updated_player = Map.put(@player1, :hand, updated_player_cards)
+    updated_player2 = Map.put(@player2, :hand, updated_player2_cards)
 
     assert game_state == %GameState{
              deck: deck,
              players: [updated_player2, updated_player],
              round: 1,
-             turn: @player.id
+             turn: @player1.id
+           }
+  end
+
+  test "play_card/3 plays the given player's card selected by index" do
+    game_state = GameState.start_game(@game_state)
+
+    {_card, player} = game_state.players |> List.last() |> Player.play_card(1)
+
+    assert GameState.play_card(game_state, @player1.id, 1) == %GameState{
+             deck: game_state.deck,
+             players: [player],
+             round: 1,
+             turn: @player1.id
            }
   end
 end

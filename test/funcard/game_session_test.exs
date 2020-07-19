@@ -107,7 +107,7 @@ defmodule Funcard.GameSessionTest do
         GameSession.new([@deck1, @deck2], @player, shuffle?: false)
         |> GameSession.add_event(Event.add_player(baz))
         |> GameSession.add_event(Event.start_game())
-        |> GameSession.add_event(Event.play_card(baz, %Card{data: "fasd"}))
+        |> GameSession.add_event(Event.play_card(baz.id, 1))
         |> GameSession.add_event(Event.end_round(%Card{data: "bar"}))
 
       deck = Deck.merge(@deck2, @deck1)
@@ -132,7 +132,7 @@ defmodule Funcard.GameSessionTest do
           ]
       ] = deck.player_cards
 
-      [card_won | [card_in_play | table_cards]] = deck.table_cards
+      [card_won | [_card_in_play | table_cards]] = deck.table_cards
 
       assert GameSession.apply_events(game) == %GameState{
                deck: Map.put(deck, :player_cards, cards) |> Map.put(:table_cards, table_cards),
