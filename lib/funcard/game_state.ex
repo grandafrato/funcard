@@ -6,7 +6,9 @@ defmodule Funcard.GameState do
   alias Funcard.Player
 
   typedstruct enforce: true do
+    field :card_in_play, Deck.Card.t(), enforce: false
     field :deck, Deck.t()
+    field :played_cards, list({Player.id(), Deck.Card.t()}), default: []
     field :players, list(Player.t())
     field :round, integer(), default: 0
     field :turn, Player.id() | :nobody, default: :nobody
@@ -32,7 +34,7 @@ defmodule Funcard.GameState do
 
   @spec play_card(t(), Player.id(), integer()) :: t()
   def play_card(game_state, player_id, card_id) do
-    {_card, player} =
+    {card, player} =
       game_state.players
       |> Enum.find(&(&1.id == player_id))
       |> Player.play_card(card_id)
@@ -42,12 +44,13 @@ defmodule Funcard.GameState do
 
     game_state
     |> Map.put(:players, first_half ++ [player | second_half])
+    |> Map.put(:played_cards, [{player_id, card} | game_state.played_cards])
   end
 
   @spec start_game(t()) :: t()
   def start_game(game_state) do
     {players, player_cards} = distribute_cards(game_state.players, game_state.deck.player_cards)
-    table_cards = tl(game_state.deck.table_cards)
+    [card_in_play | table_cards] = game_state.deck.table_cards
 
     game_state
     |> Map.put(:turn, List.last(game_state.players).id)
@@ -57,6 +60,7 @@ defmodule Funcard.GameState do
       :deck,
       Map.put(game_state.deck, :table_cards, table_cards) |> Map.put(:player_cards, player_cards)
     )
+    |> Map.put(:card_in_play, card_in_play)
   end
 
   defp distribute_cards(players, player_cards) do

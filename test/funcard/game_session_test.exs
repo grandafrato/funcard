@@ -132,10 +132,11 @@ defmodule Funcard.GameSessionTest do
           ]
       ] = deck.player_cards
 
-      [card_won | [_card_in_play | table_cards]] = deck.table_cards
+      [card_won | [card_in_play | table_cards]] = deck.table_cards
 
       assert GameSession.apply_events(game) == %GameState{
                deck: Map.put(deck, :player_cards, cards) |> Map.put(:table_cards, table_cards),
+               card_in_play: card_in_play,
                players: [
                  Map.put(baz, :cards_won, card_won)
                  |> Map.put(:hand, [card3, card5, card7, card9, card11]),

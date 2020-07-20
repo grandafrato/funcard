@@ -57,6 +57,7 @@ defmodule Funcard.GameStateTest do
     updated_player2 = Map.put(@player2, :hand, updated_player2_cards)
 
     assert game_state == %GameState{
+             card_in_play: hd(@deck.table_cards),
              deck: deck,
              players: [updated_player2, updated_player],
              round: 1,
@@ -67,11 +68,13 @@ defmodule Funcard.GameStateTest do
   test "play_card/3 plays the given player's card selected by index" do
     game_state = GameState.start_game(@game_state)
 
-    {_card, player} = game_state.players |> List.last() |> Player.play_card(1)
+    {card, player} = game_state.players |> List.last() |> Player.play_card(1)
 
     assert GameState.play_card(game_state, @player1.id, 1) == %GameState{
+             card_in_play: hd(@deck.table_cards),
              deck: game_state.deck,
              players: [player],
+             played_cards: [{@player1.id, card}],
              round: 1,
              turn: @player1.id
            }
