@@ -34,6 +34,37 @@ defmodule Funcard.GameState do
 
   @spec end_round(t(), non_neg_integer()) :: t()
   def end_round(game_state, card_index) do
+    players_and_cards =
+      Enum.map(game_state.players, &give_needed_cards({&1, game_state.deck.player_cards}))
+
+    [{_, player_cards} | _] = players_and_cards
+    {id, _card} = Enum.at(game_state.played_cards, card_index)
+
+    players =
+      Enum.map(
+        players_and_cards,
+        &normalize_player_and_give_card_won(&1, id, game_state.card_in_play)
+      )
+
+    turn =
+      Enum.at(
+        game_state.players,
+        Enum.find_index(game_state.players, &(&1.id == game_state.turn)) + 1,
+        List.first(game_state.players)
+      ).id
+
+    [card_in_play | table_cards] = game_state.deck.table_cards
+
+    game_state
+    |> Map.put(:players, players)
+    |> Map.put(:round, game_state.round + 1)
+    |> Map.put(:turn, turn)
+    |> Map.put(:played_cards, [])
+    |> Map.put(:card_in_play, card_in_play)
+    |> Map.put(
+      :deck,
+      Map.put(game_state.deck, :table_cards, table_cards) |> Map.put(:player_cards, player_cards)
+    )
   end
 
   @spec play_card(t(), Player.id(), pos_integer()) :: t()
@@ -92,5 +123,23 @@ defmodule Funcard.GameState do
     updated_player_cards = Enum.take(player_cards, -Enum.count(players))
 
     {updated_players, updated_player_cards}
+  end
+
+  defp give_needed_cards(input = {player, _player_cards}) do
+    case Enum.count(player.hand) do
+      5 ->
+        input
+
+      _ ->
+        give_needed_cards(Player.draw_card(input))
+    end
+  end
+
+  defp normalize_player_and_give_card_won({player, _}, id, card_won) do
+    if player.id == id do
+      Map.put(player, :cards_won, [card_won | player.cards_won])
+    else
+      player
+    end
   end
 end

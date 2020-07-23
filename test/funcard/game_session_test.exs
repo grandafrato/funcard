@@ -138,14 +138,12 @@ defmodule Funcard.GameSessionTest do
                deck: Map.put(deck, :player_cards, cards) |> Map.put(:table_cards, table_cards),
                card_in_play: card_in_play,
                players: [
-                 Map.put(baz, :cards_won, card_won)
-                 |> Map.put(:hand, [card3, card5, card7, card9, card11]),
+                 Map.put(baz, :cards_won, [card_won])
+                 |> Map.put(:hand, [card11, card3, card5, card7, card9]),
                  Map.put(@player, :hand, [card2, card4, card6, card8, card10])
                ],
                round: 2,
-               turn:
-                 Map.put(baz, :cards_won, card_won)
-                 |> Map.put(:hand, [card3, card5, card7, card9, card11])
+               turn: baz.id
              }
     end
   end

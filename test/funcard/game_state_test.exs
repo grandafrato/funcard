@@ -100,7 +100,7 @@ defmodule Funcard.GameStateTest do
         |> GameState.play_card(@player2.id, 1)
         |> GameState.end_round(0)
 
-      assert game_state.round == 1
+      assert game_state.round == 2
     end
 
     test "gives the player the card won" do
@@ -125,10 +125,10 @@ defmodule Funcard.GameStateTest do
         |> GameState.play_card(@player2.id, 1)
         |> GameState.end_round(0)
 
-      assert game_state.round == @player2.id
+      assert game_state.turn == @player2.id
     end
 
-    test "moves the tail player to the head" do
+    test "draws the next table card" do
       game_state =
         @game_state
         |> GameState.add_player(@player2)
@@ -136,7 +136,7 @@ defmodule Funcard.GameStateTest do
         |> GameState.play_card(@player2.id, 1)
         |> GameState.end_round(0)
 
-      assert hd(game_state.players).id == @player1.id
+      assert game_state.card_in_play == %Card{data: "two {||}"}
     end
   end
 end
