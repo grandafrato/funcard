@@ -32,7 +32,11 @@ defmodule Funcard.GameState do
     Map.put(game_state, :players, [player | game_state.players])
   end
 
-  @spec play_card(t(), Player.id(), integer()) :: t()
+  @spec end_round(t(), non_neg_integer()) :: t()
+  def end_round(game_state, card_index) do
+  end
+
+  @spec play_card(t(), Player.id(), pos_integer()) :: t()
   def play_card(game_state, player_id, card_id) do
     {card, player} =
       game_state.players

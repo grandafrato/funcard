@@ -108,7 +108,7 @@ defmodule Funcard.GameSessionTest do
         |> GameSession.add_event(Event.add_player(baz))
         |> GameSession.add_event(Event.start_game())
         |> GameSession.add_event(Event.play_card(baz.id, 1))
-        |> GameSession.add_event(Event.end_round(%Card{data: "bar"}))
+        |> GameSession.add_event(Event.end_round(0))
 
       deck = Deck.merge(@deck2, @deck1)
 

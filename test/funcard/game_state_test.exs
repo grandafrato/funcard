@@ -79,4 +79,64 @@ defmodule Funcard.GameStateTest do
              turn: @player1.id
            }
   end
+
+  describe "end_round/2" do
+    test "gives each player the amount of cards they need" do
+      game_state =
+        @game_state
+        |> GameState.add_player(@player2)
+        |> GameState.start_game()
+        |> GameState.play_card(@player2.id, 1)
+        |> GameState.end_round(0)
+
+      assert game_state.players |> Enum.map(&Enum.count(&1.hand)) |> Enum.dedup() == [5]
+    end
+
+    test "ups the round number" do
+      game_state =
+        @game_state
+        |> GameState.add_player(@player2)
+        |> GameState.start_game()
+        |> GameState.play_card(@player2.id, 1)
+        |> GameState.end_round(0)
+
+      assert game_state.round == 1
+    end
+
+    test "gives the player the card won" do
+      game_state =
+        @game_state
+        |> GameState.add_player(@player2)
+        |> GameState.start_game()
+        |> GameState.play_card(@player2.id, 1)
+
+      assert game_state
+             |> GameState.end_round(0)
+             |> Map.fetch!(:players)
+             |> List.first()
+             |> Map.fetch!(:cards_won) == [game_state.card_in_play]
+    end
+
+    test "makes it the next player's turn" do
+      game_state =
+        @game_state
+        |> GameState.add_player(@player2)
+        |> GameState.start_game()
+        |> GameState.play_card(@player2.id, 1)
+        |> GameState.end_round(0)
+
+      assert game_state.round == @player2.id
+    end
+
+    test "moves the tail player to the head" do
+      game_state =
+        @game_state
+        |> GameState.add_player(@player2)
+        |> GameState.start_game()
+        |> GameState.play_card(@player2.id, 1)
+        |> GameState.end_round(0)
+
+      assert hd(game_state.players).id == @player1.id
+    end
+  end
 end

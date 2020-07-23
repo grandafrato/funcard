@@ -4,7 +4,7 @@ defmodule Funcard.Event do
   alias Funcard.Deck.Card
   alias Funcard.Player
 
-  @type event_arg() :: Player.t() | Card.t()
+  @type event_arg() :: Player.t() | Card.t() | non_neg_integer()
 
   typedstruct enforce: true do
     field :args, list(event_arg())
@@ -41,7 +41,7 @@ defmodule Funcard.Event do
   Generates the event that ends a round. The first argument is the table_master
   and the second is the winner of the round.
   """
-  @spec end_round(Card.t()) :: t()
+  @spec end_round(non_neg_integer) :: t()
   def end_round(winning_card), do: new(:end_round, [winning_card])
 
   @doc """

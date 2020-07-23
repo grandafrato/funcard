@@ -1,7 +1,6 @@
 defmodule Funcard.EventTest do
   use ExUnit.Case, async: true
 
-  alias Funcard.Deck.Card
   alias Funcard.Event
   alias Funcard.Player
 
@@ -19,8 +18,8 @@ defmodule Funcard.EventTest do
   end
 
   test "end_round/1" do
-    assert event_to_timeless_map(Event.end_round(%Card{data: "Winner"})) == %{
-             args: [%Card{data: "Winner"}],
+    assert event_to_timeless_map(Event.end_round(0)) == %{
+             args: [0],
              event: :end_round
            }
   end
