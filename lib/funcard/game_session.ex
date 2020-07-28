@@ -8,6 +8,7 @@ defmodule Funcard.GameSession do
 
   typedstruct enforce: true do
     field :admin, Player.id()
+    field :current_state, GameState.t(), enforce: false
     field :events, list(Event.t()), default: []
     field :initial_state, GameState.t()
   end
@@ -90,9 +91,13 @@ defmodule Funcard.GameSession do
     Map.put(game, :events, events)
   end
 
-  @spec apply_events(t()) :: GameState.t()
+  @spec apply_events(t()) :: t()
   def apply_events(game) do
-    List.foldl(game.events, game.initial_state, &GameState.apply_event(&2, &1))
+    Map.put(
+      game,
+      :current_state,
+      List.foldl(game.events, game.initial_state, &GameState.apply_event(&2, &1))
+    )
   end
 
   @spec sort_into_events(Event.t(), list(Event.t())) :: list(Event.t())

@@ -1,30 +1,9 @@
 defmodule Funcard.GameSessionTest do
-  use ExUnit.Case, async: true
+  use Funcard.GameCase, async: true
 
-  alias Funcard.{Deck, Deck.Card, Event, GameSession, GameState, Player}
+  alias Funcard.{Deck, Event, GameSession, GameState, Player}
 
   doctest GameSession
-
-  @hand [%Card{data: "bar"}, %Card{data: "baz"}]
-  @deck1 %Deck{
-    name: "Foo Deck",
-    player_cards: [%Card{data: "fasd"}, %Card{data: "lololololo"}, %Card{data: "feet"} | @hand],
-    table_cards: [%Card{data: "1 {||}"}, %Card{data: "2 {||}"}, %Card{data: "3 {||}"}]
-  }
-  @deck2 %Deck{
-    name: "Bar Deck",
-    player_cards: [
-      %Card{data: "slom"},
-      %Card{data: "*cries*"},
-      %Card{data: "toes"},
-      %Card{data: "bananana"},
-      %Card{data: "Craig"},
-      %Card{data: "pizza"},
-      %Card{data: "lizard"}
-    ],
-    table_cards: [%Card{data: "one {||}"}, %Card{data: "two {||}"}, %Card{data: "three {||}"}]
-  }
-  @player Player.new("Foo")
 
   describe "new/2" do
     test "it makes a new game, with the passed in player as admin" do
@@ -134,17 +113,18 @@ defmodule Funcard.GameSessionTest do
 
       [card_won | [card_in_play | table_cards]] = deck.table_cards
 
-      assert GameSession.apply_events(game) == %GameState{
-               deck: Map.put(deck, :player_cards, cards) |> Map.put(:table_cards, table_cards),
-               card_in_play: card_in_play,
-               players: [
-                 Map.put(baz, :cards_won, [card_won])
-                 |> Map.put(:hand, [card11, card3, card5, card7, card9]),
-                 Map.put(@player, :hand, [card2, card4, card6, card8, card10])
-               ],
-               round: 2,
-               turn: baz.id
-             }
+      assert GameSession.apply_events(game) ==
+               Map.put(game, :current_state, %GameState{
+                 deck: Map.put(deck, :player_cards, cards) |> Map.put(:table_cards, table_cards),
+                 card_in_play: card_in_play,
+                 players: [
+                   Map.put(baz, :cards_won, [card_won])
+                   |> Map.put(:hand, [card11, card3, card5, card7, card9]),
+                   Map.put(@player, :hand, [card2, card4, card6, card8, card10])
+                 ],
+                 round: 2,
+                 turn: baz.id
+               })
     end
   end
 end
